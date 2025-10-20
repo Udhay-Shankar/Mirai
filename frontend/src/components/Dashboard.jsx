@@ -91,10 +91,57 @@ const Dashboard = () => {
     setAnalyticsData(null);
 
     try {
-      const response = await analyticsAPI.search(keyword);
-      setAnalyticsData(response.data);
+      // Use new scraper API
+      const token = localStorage.getItem('token');
+      
+      // Trigger scraping
+      const scrapeResponse = await fetch('http://localhost:8000/api/scrape/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ keyword: keyword.trim() })
+      });
+
+      if (!scrapeResponse.ok) {
+        throw new Error('Failed to scrape mentions');
+      }
+
+      const scrapeResult = await scrapeResponse.json();
+      
+      // Fetch analytics data
+      const mentionsResponse = await fetch(`http://localhost:8000/api/scrape/mentions/${keyword.trim()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!mentionsResponse.ok) {
+        throw new Error('Failed to fetch analytics');
+      }
+
+      const analyticsResult = await mentionsResponse.json();
+      
+      // Transform data to match existing format
+      const formattedData = {
+        total_mentions: analyticsResult.analytics.total_mentions,
+        unique_authors: analyticsResult.analytics.unique_authors,
+        total_reach: analyticsResult.analytics.total_reach,
+        avg_engagement: analyticsResult.analytics.avg_engagement,
+        sentiment_breakdown: {
+          positive: analyticsResult.analytics.sentiment_breakdown.positive,
+          neutral: analyticsResult.analytics.sentiment_breakdown.neutral,
+          negative: analyticsResult.analytics.sentiment_breakdown.negative
+        },
+        sources: analyticsResult.analytics.platform_breakdown,
+        top_keywords: analyticsResult.analytics.top_keywords || [],
+        mentions: analyticsResult.mentions
+      };
+
+      setAnalyticsData(formattedData);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to fetch analytics data');
+      setError(err.message || 'Failed to fetch analytics data');
       console.error('Error fetching analytics:', err);
     } finally {
       setSearching(false);
