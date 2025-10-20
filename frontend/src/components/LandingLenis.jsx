@@ -186,7 +186,7 @@ const LandingLenis = () => {
               to="/signup" 
               className="px-6 py-2.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-all duration-300 hover:scale-105"
             >
-              Get Started
+              Sign Up
             </Link>
           </div>
         </div>
