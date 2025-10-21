@@ -363,7 +363,7 @@ const Dashboard = () => {
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Stats Grid - Mittalmar Style */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm rounded-xl border border-primary/30 p-6 hover:border-primary/50 transition-all shadow-lg shadow-primary/10">
                     <div className="flex items-start justify-between">
                       <div>
@@ -407,6 +407,11 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Mentions Feed - Awario Style (Most Important!) */}
+                {analyticsData.mentions && analyticsData.mentions.length > 0 && (
+                  <MentionsFeed mentions={analyticsData.mentions} />
+                )}
 
                 {/* Sentiment Chart */}
                 {analyticsData.sentiment_breakdown && (

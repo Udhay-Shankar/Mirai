@@ -5,6 +5,7 @@ const { Schema, model } = mongoose;
 const mentionSchema = new Schema({
   // Core fields
   keyword: { type: String, required: true, index: true },
+  keywords: [{ type: String }], // Support multiple keywords for same mention
   platform: { type: String, required: true, enum: ['twitter', 'reddit', 'youtube', 'news'] },
   text: { type: String, required: true },
   full_text: { type: String },
