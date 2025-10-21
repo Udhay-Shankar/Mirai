@@ -74,10 +74,10 @@ class MiraiScraper:
             print(f"\n[MONGODB] Saving {len(all_mentions)} mentions to MongoDB...")
             for mention in all_mentions:
                 mention['scraped_at'] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-                # Store keywords as array to track multiple keywords for same URL
-                keywords_list = [keyword] if isinstance(mention.get('keyword'), str) else mention.get('keyword', [keyword])
+                
+                # Prepare mention data (exclude keywords from $set to avoid conflict)
                 mention_copy = mention.copy()
-                mention_copy['keywords'] = keywords_list
+                mention_copy.pop('keywords', None)  # Remove keywords if exists
                 
                 # Update or insert - only filter by URL since it's the unique index
                 self.mentions_collection.update_one(
