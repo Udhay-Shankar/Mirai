@@ -98,14 +98,14 @@ class YouTubeScraper:
                 channel = channels.get(channel_id, {})
                 channel_stats = channel.get('statistics', {})
                 
-                # Additional filtering - check if keyword appears in title or description
+                # STRICT filtering - check if exact keyword appears in title or description
                 title_lower = snippet['title'].lower()
                 desc_lower = snippet.get('description', '').lower()
                 keyword_lower = keyword.lower()
                 
-                if ' ' in keyword:
-                    if keyword_lower not in title_lower and keyword_lower not in desc_lower:
-                        continue
+                # Always check for exact keyword (even single words) to avoid false matches
+                if keyword_lower not in title_lower and keyword_lower not in desc_lower:
+                    continue
                 
                 sentiment, score = self.analyze_sentiment(snippet['title'] + ' ' + snippet.get('description', ''))
                 

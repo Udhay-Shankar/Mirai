@@ -66,14 +66,14 @@ class MiraiScraper:
         
         # YouTube
         print("\n[YOUTUBE] Scraping YouTube...")
-        youtube_mentions = self.youtube.search_mentions(keyword, max_results=max_per_platform)
+        youtube_mentions = self.youtube.search_mentions(keyword, max_results=max_per_platform, days_back=90)
         all_mentions.extend(youtube_mentions)
         
         # Save to MongoDB
         if self.db is not None and all_mentions:
             print(f"\n[MONGODB] Saving {len(all_mentions)} mentions to MongoDB...")
             for mention in all_mentions:
-                mention['scraped_at'] = datetime.now(datetime.UTC).replace(tzinfo=None).isoformat()
+                mention['scraped_at'] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
                 # Update or insert
                 self.mentions_collection.update_one(
                     {'url': mention['url'], 'keyword': keyword},

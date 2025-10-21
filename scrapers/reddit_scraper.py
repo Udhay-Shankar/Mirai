@@ -68,15 +68,15 @@ class RedditScraper:
             for post in data['data']['children']:
                 post_data = post['data']
                 
-                # Skip if keyword not in title or selftext (additional filtering)
+                # Skip if keyword not in title or selftext (strict filtering)
                 title = post_data.get('title', '').lower()
                 selftext = post_data.get('selftext', '').lower()
                 keyword_lower = keyword.lower()
                 
-                # For multi-word keywords, ensure exact phrase appears
-                if ' ' in keyword:
-                    if keyword_lower not in title and keyword_lower not in selftext:
-                        continue
+                # STRICT: Always ensure exact keyword appears (even for single words)
+                # This prevents "StratSchool" from matching "Stratocaster" or "school"
+                if keyword_lower not in title and keyword_lower not in selftext:
+                    continue
                 
                 # Combine title and selftext for sentiment analysis
                 text = f"{post_data.get('title', '')} {post_data.get('selftext', '')}"

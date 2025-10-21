@@ -4,7 +4,7 @@ Searches for tweets mentioning a specific keyword
 """
 import tweepy
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from textblob import TextBlob
 
 class TwitterScraper:
@@ -47,7 +47,7 @@ class TwitterScraper:
         
         try:
             # Calculate start time - use timezone-aware datetime
-            start_time = datetime.now(datetime.UTC).replace(tzinfo=None) - timedelta(days=days_back)
+            start_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days_back)
             
             # Enhance search query for better precision
             # If keyword has spaces or special chars, search as exact phrase
