@@ -5,7 +5,7 @@ Combines all scrapers and sends results to MongoDB
 import sys
 import os
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -32,7 +32,7 @@ class MiraiScraper:
         else:
             self.client = None
             self.db = None
-            print("[WARNING] MongoDB URI not found")
+            print("  MongoDB URI not found")
         
         # Initialize scrapers
         self.twitter = TwitterScraper()
@@ -50,30 +50,30 @@ class MiraiScraper:
         Returns:
             Dictionary with results from all platforms
         """
-        print(f"\n[INFO] Starting scraping for '{keyword}'...")
+        print(f"\n Starting scraping for '{keyword}'...")
         
         all_mentions = []
         
         # Twitter
-        print("\n[TWITTER] Scraping Twitter...")
+        print("\n Scraping Twitter...")
         twitter_mentions = self.twitter.search_mentions(keyword, max_results=max_per_platform)
         all_mentions.extend(twitter_mentions)
         
         # Reddit
-        print("\n[REDDIT] Scraping Reddit...")
+        print("\n Scraping Reddit...")
         reddit_mentions = self.reddit.search_mentions(keyword, limit=max_per_platform)
         all_mentions.extend(reddit_mentions)
         
         # YouTube
-        print("\n[YOUTUBE] Scraping YouTube...")
+        print("\n  Scraping YouTube...")
         youtube_mentions = self.youtube.search_mentions(keyword, max_results=max_per_platform)
         all_mentions.extend(youtube_mentions)
         
         # Save to MongoDB
         if self.db is not None and all_mentions:
-            print(f"\n[MONGODB] Saving {len(all_mentions)} mentions to MongoDB...")
+            print(f"\n Saving {len(all_mentions)} mentions to MongoDB...")
             for mention in all_mentions:
-                mention['scraped_at'] = datetime.now(datetime.UTC).replace(tzinfo=None).isoformat()
+                mention['scraped_at'] = datetime.utcnow().isoformat()
                 # Update or insert
                 self.mentions_collection.update_one(
                     {'url': mention['url'], 'keyword': keyword},
@@ -98,7 +98,7 @@ class MiraiScraper:
             'mentions': all_mentions
         }
         
-        print(f"\n[OK] Scraping complete!")
+        print(f"\n Scraping complete!")
         print(f"   Total: {results['total_mentions']}")
         print(f"   Twitter: {results['by_platform']['twitter']}")
         print(f"   Reddit: {results['by_platform']['reddit']}")
@@ -119,13 +119,8 @@ if __name__ == "__main__":
     results = scraper.scrape_all(keyword, max_per_platform=10)
     
     # Print sample mentions
-    print(f"\n[SAMPLE] Sample mentions:")
+    print(f"\n Sample mentions:")
     for mention in results['mentions'][:5]:
-        try:
-            print(f"\n{mention['platform'].upper()}: {mention['author']}")
-            print(f"   {mention['text'][:100]}...")
-            print(f"   Sentiment: {mention['sentiment']} | Engagement: {mention.get('engagement', 0)}")
-        except UnicodeEncodeError:
-            print(f"\n{mention['platform'].upper()}: {mention['author']}")
-            print(f"   [Text contains special characters]")
-            print(f"   Sentiment: {mention['sentiment']} | Engagement: {mention.get('engagement', 0)}")
+        print(f"\n{mention['platform'].upper()}: {mention['author']}")
+        print(f"   {mention['text'][:100]}...")
+        print(f"   Sentiment: {mention['sentiment']} | Engagement: {mention.get('engagement', 0)}")

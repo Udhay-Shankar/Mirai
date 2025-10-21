@@ -8,6 +8,8 @@ import SentimentChart from './SentimentChart';
 import InfluencerList from './InfluencerList';
 import TrendingMetrics from './TrendingMetrics';
 import MiraiLogo from './MiraiLogo';
+import MentionsFeed from './MentionsFeed';
+import AdvancedAnalytics from './AdvancedAnalytics';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -92,7 +94,11 @@ const Dashboard = () => {
 
     try {
       // Use new scraper API
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
       
       // Trigger scraping
       const scrapeResponse = await fetch('http://localhost:8000/api/scrape/search', {
@@ -125,18 +131,19 @@ const Dashboard = () => {
       
       // Transform data to match existing format
       const formattedData = {
-        total_mentions: analyticsResult.analytics.total_mentions,
-        unique_authors: analyticsResult.analytics.unique_authors,
-        total_reach: analyticsResult.analytics.total_reach,
-        avg_engagement: analyticsResult.analytics.avg_engagement,
+        total_mentions: analyticsResult.analytics.total_mentions || 0,
+        unique_authors: analyticsResult.analytics.by_platform ? 
+          Object.values(analyticsResult.analytics.by_platform).reduce((a, b) => a + b, 0) : 0,
+        total_reach: analyticsResult.analytics.total_reach || 0,
+        avg_engagement: analyticsResult.analytics.total_engagement || 0,
         sentiment_breakdown: {
-          positive: analyticsResult.analytics.sentiment_breakdown.positive,
-          neutral: analyticsResult.analytics.sentiment_breakdown.neutral,
-          negative: analyticsResult.analytics.sentiment_breakdown.negative
+          positive: analyticsResult.analytics.sentiment?.positive || 0,
+          neutral: analyticsResult.analytics.sentiment?.neutral || 0,
+          negative: analyticsResult.analytics.sentiment?.negative || 0
         },
-        sources: analyticsResult.analytics.platform_breakdown,
+        sources: analyticsResult.analytics.by_platform || {},
         top_keywords: analyticsResult.analytics.top_keywords || [],
-        mentions: analyticsResult.mentions
+        mentions: analyticsResult.mentions || []
       };
 
       setAnalyticsData(formattedData);
