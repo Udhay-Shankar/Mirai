@@ -1,11 +1,19 @@
 """
-Twitter Scraper using Tweepy (Twitter API v2)
+Twitter Scraper using Tweepy (Twitter API v2) with snscrape fallback
 Searches for tweets mentioning a specific keyword
 """
 import tweepy
 import os
 from datetime import datetime, timedelta, timezone
 from textblob import TextBlob
+
+# Try to import snscrape, but don't fail if not available
+try:
+    import snscrape.modules.twitter as sntwitter
+    SNSCRAPE_AVAILABLE = True
+except (ImportError, AttributeError) as e:
+    SNSCRAPE_AVAILABLE = False
+    print(f"[INFO] Snscrape not available (Python 3.13 compatibility issue). Using API only.")
 
 class TwitterScraper:
     def __init__(self):
@@ -29,6 +37,85 @@ class TwitterScraper:
             return 'negative', polarity
         else:
             return 'neutral', polarity
+    
+    def search_with_snscrape(self, keyword, max_results=100, days_back=7):
+        """
+        Fallback method using snscrape (no API needed, no rate limits)
+        """
+        if not SNSCRAPE_AVAILABLE:
+            print("[WARNING] Snscrape not available. Cannot use fallback.")
+            return []
+            
+        try:
+            print("[INFO] Using snscrape fallback (no API limits)...")
+            
+            since_date = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            search_query = f"{keyword} lang:en since:{since_date} -filter:retweets"
+            
+            mentions = []
+            tweet_count = 0
+            
+            for i, tweet in enumerate(sntwitter.TwitterSearchScraper(search_query).get_items()):
+                if tweet_count >= max_results:
+                    break
+                
+                if keyword.lower() not in tweet.rawContent.lower():
+                    continue
+                
+                sentiment, score = self.analyze_sentiment(tweet.rawContent)
+                
+                hashtags = [tag for tag in (tweet.hashtags or [])]
+                user_mentions = [mention.username for mention in (tweet.mentionedUsers or [])]
+                
+                followers = tweet.user.followersCount if tweet.user else 0
+                likes = tweet.likeCount or 0
+                retweets = tweet.retweetCount or 0
+                replies = tweet.replyCount or 0
+                
+                engagement_rate = (likes + retweets) / max(followers, 1) * 100
+                influence_score = min(100, (followers / 10000) * 50 + engagement_rate * 50)
+                
+                is_verified = tweet.user.verified if tweet.user else False
+                source_quality = 'high' if (is_verified or followers > 10000) else ('medium' if followers > 1000 else 'low')
+                
+                mention = {
+                    'platform': 'twitter',
+                    'keyword': keyword,
+                    'text': tweet.rawContent,
+                    'author': tweet.user.username if tweet.user else 'Unknown',
+                    'author_name': tweet.user.displayname if tweet.user else 'Unknown',
+                    'author_followers': followers,
+                    'author_verified': is_verified,
+                    'author_bio': tweet.user.description if tweet.user else None,
+                    'url': tweet.url,
+                    'timestamp': tweet.date.isoformat() if tweet.date else datetime.now(timezone.utc).isoformat(),
+                    'sentiment': sentiment,
+                    'sentiment_score': score,
+                    'likes': likes,
+                    'retweets': retweets,
+                    'replies': replies,
+                    'views': tweet.viewCount or 0,
+                    'engagement': likes + retweets + replies,
+                    'reach': followers + (likes * 2),
+                    'engagement_rate': round(engagement_rate, 2),
+                    'influence_score': round(influence_score, 2),
+                    'source_quality': source_quality,
+                    'hashtags': hashtags,
+                    'mentions': user_mentions,
+                    'language': tweet.lang or 'en',
+                    'location': tweet.user.location if tweet.user else None,
+                    'content_type': 'tweet'
+                }
+                
+                mentions.append(mention)
+                tweet_count += 1
+            
+            print(f"[OK] Found {len(mentions)} tweets using snscrape for '{keyword}'")
+            return mentions
+            
+        except Exception as e:
+            print(f"[ERROR] Snscrape error: {str(e)}")
+            return []
     
     def search_mentions(self, keyword, max_results=100, days_back=7):
         """
@@ -144,9 +231,13 @@ class TwitterScraper:
             print(f"[OK] Found {len(mentions)} tweets for '{keyword}'")
             return mentions
             
+        except tweepy.TooManyRequests as e:
+            print(f"[WARNING] Twitter API rate limited (429). Switching to snscrape fallback...")
+            return self.search_with_snscrape(keyword, max_results, days_back)
+            
         except Exception as e:
-            print(f"[ERROR] Twitter scraping error: {str(e)}")
-            return []
+            print(f"[ERROR] Twitter API error: {str(e)}. Trying snscrape fallback...")
+            return self.search_with_snscrape(keyword, max_results, days_back)
 
 if __name__ == "__main__":
     # Test the scraper
