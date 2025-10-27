@@ -21,8 +21,8 @@ router.post('/search', authMiddleware, async (req, res) => {
     // Path to Python scraper
     const scraperPath = path.resolve(__dirname, '../../../scrapers/main_scraper.py');
     
-    // Spawn Python process
-    const python = spawn('python', [scraperPath, keyword]);
+    // Spawn Python process with higher limits (50 per platform = 150 total)
+    const python = spawn('python', [scraperPath, keyword, '50']);
     
     let dataString = '';
     let errorString = '';
@@ -49,8 +49,8 @@ router.post('/search', authMiddleware, async (req, res) => {
         }
       }
       
-      // Get results from MongoDB
-      const mentions = await Mention.find({ keyword }).sort({ timestamp: -1 }).limit(100);
+      // Get results from MongoDB (increased from 100 to 500 for more data)
+      const mentions = await Mention.find({ keyword }).sort({ timestamp: -1 }).limit(500);
       
       // Calculate analytics
       const analytics = {

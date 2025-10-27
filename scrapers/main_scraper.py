@@ -39,13 +39,13 @@ class MiraiScraper:
         self.reddit = RedditScraper()
         self.youtube = YouTubeScraper()
     
-    def scrape_all(self, keyword, max_per_platform=50):
+    def scrape_all(self, keyword, max_per_platform=100):
         """
         Scrape all platforms for a keyword
         
         Args:
             keyword: Search term
-            max_per_platform: Max results per platform
+            max_per_platform: Max results per platform (default 100, Awario uses 1000+)
             
         Returns:
             Dictionary with results from all platforms
@@ -121,10 +121,12 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1:
         keyword = sys.argv[1]
+        max_per_platform = int(sys.argv[2]) if len(sys.argv) > 2 else 50  # Default 50 per platform
     else:
         keyword = "Nike"
+        max_per_platform = 50
     
-    results = scraper.scrape_all(keyword, max_per_platform=10)
+    results = scraper.scrape_all(keyword, max_per_platform=max_per_platform)
     
     # Print sample mentions
     print(f"\n[SAMPLE] Sample mentions:")
