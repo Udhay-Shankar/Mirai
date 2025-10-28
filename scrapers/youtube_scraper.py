@@ -55,43 +55,60 @@ class YouTubeScraper:
             else:
                 search_query = keyword
             
-            # Search videos
-            search_response = self.youtube.search().list(
-                q=search_query,
-                part='snippet',
-                maxResults=min(max_results, 50),
-                publishedAfter=published_after,
-                type='video',
-                order='relevance',
-                relevanceLanguage='en'
-            ).execute()
+            # Search videos with pagination
+            all_video_ids = []
+            page_token = None
+            max_pages = min(20, (max_results // 50) + 1)  # Max 20 pages (1000 results)
+            
+            for page in range(max_pages):
+                search_response = self.youtube.search().list(
+                    q=search_query,
+                    part='snippet',
+                    maxResults=50,
+                    publishedAfter=published_after,
+                    type='video',
+                    order='relevance',
+                    relevanceLanguage='en',
+                    pageToken=page_token
+                ).execute()
+                
+                for item in search_response.get('items', []):
+                    all_video_ids.append(item['id']['videoId'])
+                
+                page_token = search_response.get('nextPageToken')
+                if not page_token or len(all_video_ids) >= max_results:
+                    break
             
             mentions = []
-            video_ids = []
             
-            for item in search_response.get('items', []):
-                video_ids.append(item['id']['videoId'])
-            
-            if not video_ids:
+            if not all_video_ids:
                 return []
             
-            # Get video statistics and channel details
-            videos_response = self.youtube.videos().list(
-                id=','.join(video_ids),
-                part='statistics,snippet,contentDetails'
-            ).execute()
+            # Process videos in batches of 50 (API limit)
+            for i in range(0, len(all_video_ids), 50):
+                batch_ids = all_video_ids[i:i+50]
             
-            # Get channel statistics for all unique channels
-            channel_ids = list(set([v['snippet']['channelId'] for v in videos_response.get('items', [])]))
-            channels_response = self.youtube.channels().list(
-                id=','.join(channel_ids),
-                part='statistics,snippet'
-            ).execute()
+            # Process videos in batches of 50 (API limit)
+            for i in range(0, len(all_video_ids), 50):
+                batch_ids = all_video_ids[i:i+50]
             
-            # Create channel lookup
-            channels = {c['id']: c for c in channels_response.get('items', [])}
+                # Get video statistics and channel details
+                videos_response = self.youtube.videos().list(
+                    id=','.join(batch_ids),
+                    part='statistics,snippet,contentDetails'
+                ).execute()
+                
+                # Get channel statistics for all unique channels
+                channel_ids = list(set([v['snippet']['channelId'] for v in videos_response.get('items', [])]))
+                channels_response = self.youtube.channels().list(
+                    id=','.join(channel_ids),
+                    part='statistics,snippet'
+                ).execute()
+                
+                # Create channel lookup
+                channels = {c['id']: c for c in channels_response.get('items', [])}
             
-            for video in videos_response.get('items', []):
+                for video in videos_response.get('items', []):
                 snippet = video['snippet']
                 stats = video['statistics']
                 channel_id = snippet['channelId']

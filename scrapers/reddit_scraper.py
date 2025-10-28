@@ -42,7 +42,7 @@ class RedditScraper:
         try:
             mentions = []
             
-            # Search Reddit using JSON API
+            # Search Reddit using JSON API with pagination
             search_url = f"{self.base_url}/search.json"
             
             # Enhance search query for exact phrase matching
@@ -51,21 +51,31 @@ class RedditScraper:
             else:
                 search_term = keyword
             
-            params = {
-                'q': search_term,
-                'limit': min(limit, 100),
-                'sort': 'new',
-                't': 'year'  # Past year (production-ready)
-            }
+            after = None  # Pagination token
+            batch_count = 0
+            max_batches = min(10, (limit // 100) + 1)  # Max 10 pages (1000 results)
             
-            response = requests.get(search_url, headers=self.headers, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            
-            if 'data' not in data or 'children' not in data['data']:
-                return []
-            
-            for post in data['data']['children']:
+            while batch_count < max_batches and len(mentions) < limit:
+                params = {
+                    'q': search_term,
+                    'limit': 100,  # Max per request
+                    'sort': 'new',
+                    't': 'year',  # Past year (production-ready)
+                    'after': after  # Pagination
+                }
+                
+                response = requests.get(search_url, headers=self.headers, params=params, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                
+                if 'data' not in data or 'children' not in data['data']:
+                    break
+                
+                children = data['data']['children']
+                if not children:
+                    break
+                
+                for post in children:
                 post_data = post['data']
                 
                 # Skip if keyword not in title or selftext (strict filtering)
@@ -125,6 +135,21 @@ class RedditScraper:
                     'location': None  # Reddit doesn't provide location
                 }
                 mentions.append(mention)
+                
+                if len(mentions) >= limit:
+                    break
+            
+            # Get pagination token for next page
+            after = data['data'].get('after')
+            batch_count += 1
+            
+            # If no more pages, stop
+            if not after:
+                break
+            
+            # Small delay to avoid rate limiting
+            import time
+            time.sleep(0.5)
             
             print(f"[OK] Found {len(mentions)} Reddit posts for '{keyword}'")
             return mentions
