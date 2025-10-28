@@ -109,72 +109,72 @@ class YouTubeScraper:
                 channels = {c['id']: c for c in channels_response.get('items', [])}
             
                 for video in videos_response.get('items', []):
-                snippet = video['snippet']
-                stats = video['statistics']
-                channel_id = snippet['channelId']
-                channel = channels.get(channel_id, {})
-                channel_stats = channel.get('statistics', {})
-                
-                # STRICT filtering - check if exact keyword appears in title or description
-                title_lower = snippet['title'].lower()
-                desc_lower = snippet.get('description', '').lower()
-                keyword_lower = keyword.lower()
-                
-                # Always check for exact keyword (even single words) to avoid false matches
-                if keyword_lower not in title_lower and keyword_lower not in desc_lower:
-                    continue
-                
-                sentiment, score = self.analyze_sentiment(snippet['title'] + ' ' + snippet.get('description', ''))
-                
-                # Extract tags
-                tags = snippet.get('tags', [])
-                
-                # Calculate metrics
-                views = int(stats.get('viewCount', 0))
-                likes = int(stats.get('likeCount', 0))
-                comments_count = int(stats.get('commentCount', 0))
-                subscribers = int(channel_stats.get('subscriberCount', 0))
-                
-                # Calculate influence score
-                engagement_rate = (likes + comments_count) / max(views, 1) * 100
-                influence_score = min(100, (subscribers / 100000) * 50 + engagement_rate * 50)
-                
-                # Determine source quality
-                source_quality = 'high' if subscribers > 100000 else ('medium' if subscribers > 10000 else 'low')
-                
-                # Get video duration
-                duration = video.get('contentDetails', {}).get('duration', 'PT0S')
-                
-                mention = {
-                    'platform': 'youtube',
-                    'keyword': keyword,
-                    'text': snippet['title'],
-                    'full_text': f"{snippet['title']}\n{snippet.get('description', '')[:300]}",
-                    'author': snippet['channelTitle'],
-                    'author_name': snippet['channelTitle'],
-                    'author_followers': subscribers,
-                    'author_verified': False,  # YouTube API doesn't easily expose verified status
-                    'channel_id': channel_id,
-                    'url': f"https://www.youtube.com/watch?v={video['id']}",
-                    'timestamp': snippet['publishedAt'],
-                    'sentiment': sentiment,
-                    'sentiment_score': score,
-                    'views': views,
-                    'likes': likes,
-                    'comments': comments_count,
-                    'engagement': likes + comments_count,
-                    'reach': views + (subscribers // 10),  # Views + % of subscriber base
-                    'tags': tags[:10],  # Top 10 tags
-                    'duration': duration,
-                    'thumbnail': snippet.get('thumbnails', {}).get('high', {}).get('url', ''),
-                    'channel_subscribers': subscribers,
-                    'engagement_rate': round(engagement_rate, 2),
-                    'influence_score': round(influence_score, 2),
-                    'source_quality': source_quality,
-                    'content_type': 'video',
-                    'location': None  # Would need additional API calls
-                }
-                mentions.append(mention)
+                    snippet = video['snippet']
+                    stats = video['statistics']
+                    channel_id = snippet['channelId']
+                    channel = channels.get(channel_id, {})
+                    channel_stats = channel.get('statistics', {})
+                    
+                    # STRICT filtering - check if exact keyword appears in title or description
+                    title_lower = snippet['title'].lower()
+                    desc_lower = snippet.get('description', '').lower()
+                    keyword_lower = keyword.lower()
+                    
+                    # Always check for exact keyword (even single words) to avoid false matches
+                    if keyword_lower not in title_lower and keyword_lower not in desc_lower:
+                        continue
+                    
+                    sentiment, score = self.analyze_sentiment(snippet['title'] + ' ' + snippet.get('description', ''))
+                    
+                    # Extract tags
+                    tags = snippet.get('tags', [])
+                    
+                    # Calculate metrics
+                    views = int(stats.get('viewCount', 0))
+                    likes = int(stats.get('likeCount', 0))
+                    comments_count = int(stats.get('commentCount', 0))
+                    subscribers = int(channel_stats.get('subscriberCount', 0))
+                    
+                    # Calculate influence score
+                    engagement_rate = (likes + comments_count) / max(views, 1) * 100
+                    influence_score = min(100, (subscribers / 100000) * 50 + engagement_rate * 50)
+                    
+                    # Determine source quality
+                    source_quality = 'high' if subscribers > 100000 else ('medium' if subscribers > 10000 else 'low')
+                    
+                    # Get video duration
+                    duration = video.get('contentDetails', {}).get('duration', 'PT0S')
+                    
+                    mention = {
+                        'platform': 'youtube',
+                        'keyword': keyword,
+                        'text': snippet['title'],
+                        'full_text': f"{snippet['title']}\n{snippet.get('description', '')[:300]}",
+                        'author': snippet['channelTitle'],
+                        'author_name': snippet['channelTitle'],
+                        'author_followers': subscribers,
+                        'author_verified': False,  # YouTube API doesn't easily expose verified status
+                        'channel_id': channel_id,
+                        'url': f"https://www.youtube.com/watch?v={video['id']}",
+                        'timestamp': snippet['publishedAt'],
+                        'sentiment': sentiment,
+                        'sentiment_score': score,
+                        'views': views,
+                        'likes': likes,
+                        'comments': comments_count,
+                        'engagement': likes + comments_count,
+                        'reach': views + (subscribers // 10),  # Views + % of subscriber base
+                        'tags': tags[:10],  # Top 10 tags
+                        'duration': duration,
+                        'thumbnail': snippet.get('thumbnails', {}).get('high', {}).get('url', ''),
+                        'channel_subscribers': subscribers,
+                        'engagement_rate': round(engagement_rate, 2),
+                        'influence_score': round(influence_score, 2),
+                        'source_quality': source_quality,
+                        'content_type': 'video',
+                        'location': None  # Would need additional API calls
+                    }
+                    mentions.append(mention)
             
             print(f"[OK] Found {len(mentions)} YouTube videos for '{keyword}'")
             return mentions

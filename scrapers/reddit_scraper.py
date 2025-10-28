@@ -76,80 +76,80 @@ class RedditScraper:
                     break
                 
                 for post in children:
-                post_data = post['data']
+                    post_data = post['data']
+                    
+                    # Skip if keyword not in title or selftext (strict filtering)
+                    title = post_data.get('title', '').lower()
+                    selftext = post_data.get('selftext', '').lower()
+                    keyword_lower = keyword.lower()
+                    
+                    # STRICT: Always ensure exact keyword appears (even for single words)
+                    # This prevents "StratSchool" from matching "Stratocaster" or "school"
+                    if keyword_lower not in title and keyword_lower not in selftext:
+                        continue
+                    
+                    # Combine title and selftext for sentiment analysis
+                    text = f"{post_data.get('title', '')} {post_data.get('selftext', '')}"
+                    sentiment, score = self.analyze_sentiment(text)
+                    
+                    # Extract awards count
+                    awards = post_data.get('total_awards_received', 0)
+                    
+                    # Calculate influence score
+                    karma = post_data.get('ups', 0)
+                    comments = post_data.get('num_comments', 0)
+                    influence_score = min(100, (karma / 100) * 50 + (comments / 50) * 50)
+                    
+                    # Determine source quality based on subreddit and karma
+                    source_quality = 'high' if karma > 100 else ('medium' if karma > 10 else 'low')
+                    
+                    # Get subreddit info
+                    subreddit = post_data.get('subreddit', 'Unknown')
+                    subreddit_subscribers = post_data.get('subreddit_subscribers', 0)
+                    
+                    mention = {
+                        'platform': 'reddit',
+                        'keyword': keyword,
+                        'text': post_data.get('title', ''),
+                        'full_text': text[:500],  # Store longer text for analysis
+                        'author': post_data.get('author', 'Unknown'),
+                        'author_name': f"u/{post_data.get('author', 'Unknown')}",
+                        'author_followers': 0,  # Reddit doesn't expose follower counts easily
+                        'url': f"https://reddit.com{post_data.get('permalink', '')}",
+                        'timestamp': datetime.fromtimestamp(post_data.get('created_utc', 0)).isoformat(),
+                        'sentiment': sentiment,
+                        'sentiment_score': score,
+                        'likes': post_data.get('ups', 0),
+                        'comments': comments,
+                        'engagement': post_data.get('ups', 0) + comments,
+                        'reach': subreddit_subscribers if subreddit_subscribers > 0 else karma * 10,  # Estimate reach
+                        'subreddit': subreddit,
+                        'subreddit_subscribers': subreddit_subscribers,
+                        'awards': awards,
+                        'upvote_ratio': post_data.get('upvote_ratio', 0),
+                        'influence_score': round(influence_score, 2),
+                        'source_quality': source_quality,
+                        'content_type': 'post',
+                        'is_video': post_data.get('is_video', False),
+                        'domain': post_data.get('domain', 'self.reddit'),
+                        'location': None  # Reddit doesn't provide location
+                    }
+                    mentions.append(mention)
+                    
+                    if len(mentions) >= limit:
+                        break
                 
-                # Skip if keyword not in title or selftext (strict filtering)
-                title = post_data.get('title', '').lower()
-                selftext = post_data.get('selftext', '').lower()
-                keyword_lower = keyword.lower()
+                # Get pagination token for next page
+                after = data['data'].get('after')
+                batch_count += 1
                 
-                # STRICT: Always ensure exact keyword appears (even for single words)
-                # This prevents "StratSchool" from matching "Stratocaster" or "school"
-                if keyword_lower not in title and keyword_lower not in selftext:
-                    continue
-                
-                # Combine title and selftext for sentiment analysis
-                text = f"{post_data.get('title', '')} {post_data.get('selftext', '')}"
-                sentiment, score = self.analyze_sentiment(text)
-                
-                # Extract awards count
-                awards = post_data.get('total_awards_received', 0)
-                
-                # Calculate influence score
-                karma = post_data.get('ups', 0)
-                comments = post_data.get('num_comments', 0)
-                influence_score = min(100, (karma / 100) * 50 + (comments / 50) * 50)
-                
-                # Determine source quality based on subreddit and karma
-                source_quality = 'high' if karma > 100 else ('medium' if karma > 10 else 'low')
-                
-                # Get subreddit info
-                subreddit = post_data.get('subreddit', 'Unknown')
-                subreddit_subscribers = post_data.get('subreddit_subscribers', 0)
-                
-                mention = {
-                    'platform': 'reddit',
-                    'keyword': keyword,
-                    'text': post_data.get('title', ''),
-                    'full_text': text[:500],  # Store longer text for analysis
-                    'author': post_data.get('author', 'Unknown'),
-                    'author_name': f"u/{post_data.get('author', 'Unknown')}",
-                    'author_followers': 0,  # Reddit doesn't expose follower counts easily
-                    'url': f"https://reddit.com{post_data.get('permalink', '')}",
-                    'timestamp': datetime.fromtimestamp(post_data.get('created_utc', 0)).isoformat(),
-                    'sentiment': sentiment,
-                    'sentiment_score': score,
-                    'likes': post_data.get('ups', 0),
-                    'comments': comments,
-                    'engagement': post_data.get('ups', 0) + comments,
-                    'reach': subreddit_subscribers if subreddit_subscribers > 0 else karma * 10,  # Estimate reach
-                    'subreddit': subreddit,
-                    'subreddit_subscribers': subreddit_subscribers,
-                    'awards': awards,
-                    'upvote_ratio': post_data.get('upvote_ratio', 0),
-                    'influence_score': round(influence_score, 2),
-                    'source_quality': source_quality,
-                    'content_type': 'post',
-                    'is_video': post_data.get('is_video', False),
-                    'domain': post_data.get('domain', 'self.reddit'),
-                    'location': None  # Reddit doesn't provide location
-                }
-                mentions.append(mention)
-                
-                if len(mentions) >= limit:
+                # If no more pages, stop
+                if not after:
                     break
-            
-            # Get pagination token for next page
-            after = data['data'].get('after')
-            batch_count += 1
-            
-            # If no more pages, stop
-            if not after:
-                break
-            
-            # Small delay to avoid rate limiting
-            import time
-            time.sleep(0.5)
+                
+                # Small delay to avoid rate limiting
+                import time
+                time.sleep(0.5)
             
             print(f"[OK] Found {len(mentions)} Reddit posts for '{keyword}'")
             return mentions
