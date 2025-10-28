@@ -39,13 +39,13 @@ class MiraiScraper:
         self.reddit = RedditScraper()
         self.youtube = YouTubeScraper()
     
-    def scrape_all(self, keyword, max_per_platform=100):
+    def scrape_all(self, keyword, max_per_platform=1000):
         """
-        Scrape all platforms for a keyword
+        Scrape all platforms for a keyword - PRODUCTION READY
         
         Args:
             keyword: Search term
-            max_per_platform: Max results per platform (default 100, Awario uses 1000+)
+            max_per_platform: Max results per platform (default 1000 for production)
             
         Returns:
             Dictionary with results from all platforms
@@ -54,19 +54,19 @@ class MiraiScraper:
         
         all_mentions = []
         
-        # Twitter
+        # Twitter - search last 90 days
         print("\n[TWITTER] Scraping Twitter...")
-        twitter_mentions = self.twitter.search_mentions(keyword, max_results=max_per_platform)
+        twitter_mentions = self.twitter.search_mentions(keyword, max_results=max_per_platform, days_back=90)
         all_mentions.extend(twitter_mentions)
         
-        # Reddit
+        # Reddit - search last year
         print("\n[REDDIT] Scraping Reddit...")
         reddit_mentions = self.reddit.search_mentions(keyword, limit=max_per_platform)
         all_mentions.extend(reddit_mentions)
         
-        # YouTube
+        # YouTube - search last year
         print("\n[YOUTUBE] Scraping YouTube...")
-        youtube_mentions = self.youtube.search_mentions(keyword, max_results=max_per_platform, days_back=90)
+        youtube_mentions = self.youtube.search_mentions(keyword, max_results=max_per_platform, days_back=365)
         all_mentions.extend(youtube_mentions)
         
         # Save to MongoDB
@@ -121,10 +121,10 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1:
         keyword = sys.argv[1]
-        max_per_platform = int(sys.argv[2]) if len(sys.argv) > 2 else 50  # Default 50 per platform
+        max_per_platform = int(sys.argv[2]) if len(sys.argv) > 2 else 1000  # Default 1000 per platform (production)
     else:
         keyword = "Nike"
-        max_per_platform = 50
+        max_per_platform = 1000
     
     results = scraper.scrape_all(keyword, max_per_platform=max_per_platform)
     

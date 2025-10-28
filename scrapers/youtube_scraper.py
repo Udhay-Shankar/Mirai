@@ -30,14 +30,14 @@ class YouTubeScraper:
         else:
             return 'neutral', polarity
     
-    def search_mentions(self, keyword, max_results=50, days_back=7):
+    def search_mentions(self, keyword, max_results=1000, days_back=365):
         """
-        Search for YouTube videos mentioning the keyword with enhanced metadata
+        Search for YouTube videos mentioning the keyword - PRODUCTION READY
         
         Args:
             keyword: Search term (exact phrase if contains spaces)
-            max_results: Maximum videos to return (default 50, max 50 per request)
-            days_back: How many days back to search
+            max_results: Maximum videos to return (default 1000 for production)
+            days_back: How many days back to search (default 365 = 1 year)
             
         Returns:
             List of mention dictionaries with rich metadata

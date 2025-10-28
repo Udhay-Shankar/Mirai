@@ -55,7 +55,7 @@ class RedditScraper:
                 'q': search_term,
                 'limit': min(limit, 100),
                 'sort': 'new',
-                't': 'month'  # Past month (more results)
+                't': 'year'  # Past year (production-ready)
             }
             
             response = requests.get(search_url, headers=self.headers, params=params, timeout=10)

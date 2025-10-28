@@ -117,9 +117,9 @@ class TwitterScraper:
             print(f"[ERROR] Snscrape error: {str(e)}")
             return []
     
-    def search_mentions(self, keyword, max_results=100, days_back=7):
+    def search_mentions(self, keyword, max_results=1000, days_back=90):
         """
-        Search for tweets mentioning the keyword with exact phrase matching
+        Search for tweets mentioning the keyword with exact phrase matching - PRODUCTION READY
         
         Args:
             keyword: Search term (will search for exact phrase if contains spaces)

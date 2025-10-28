@@ -21,8 +21,8 @@ router.post('/search', authMiddleware, async (req, res) => {
     // Path to Python scraper
     const scraperPath = path.resolve(__dirname, '../../../scrapers/main_scraper.py');
     
-    // Spawn Python process with higher limits (50 per platform = 150 total)
-    const python = spawn('python', [scraperPath, keyword, '50']);
+    // Spawn Python process with production limits (1000 per platform)
+    const python = spawn('python', [scraperPath, keyword, '1000']);
     
     let dataString = '';
     let errorString = '';
