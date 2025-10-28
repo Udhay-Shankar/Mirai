@@ -117,6 +117,24 @@ class MiraiScraper:
 
 if __name__ == "__main__":
     # Test the orchestrator
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     scraper = MiraiScraper()
     
     if len(sys.argv) > 1:
