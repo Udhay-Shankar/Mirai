@@ -55,6 +55,8 @@ class RedditScraper:
             batch_count = 0
             max_batches = min(10, (limit // 100) + 1)  # Max 10 pages (1000 results)
             
+            print(f"[DEBUG] Reddit targeting {limit} posts, max {max_batches} batches")
+            
             while batch_count < max_batches and len(mentions) < limit:
                 params = {
                     'q': search_term,
@@ -73,6 +75,7 @@ class RedditScraper:
                 
                 children = data['data']['children']
                 if not children:
+                    print(f"[DEBUG] Reddit: No more children at batch {batch_count}")
                     break
                 
                 for post in children:
@@ -143,8 +146,11 @@ class RedditScraper:
                 after = data['data'].get('after')
                 batch_count += 1
                 
+                print(f"[DEBUG] Reddit: Batch {batch_count} done, total={len(mentions)}, after={after[:20] if after else None}")
+                
                 # If no more pages, stop
                 if not after:
+                    print(f"[DEBUG] Reddit: No more pages (after token is None)")
                     break
                 
                 # Small delay to avoid rate limiting

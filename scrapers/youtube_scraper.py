@@ -60,6 +60,8 @@ class YouTubeScraper:
             page_token = None
             max_pages = min(20, (max_results // 50) + 1)  # Max 20 pages (1000 results)
             
+            print(f"[DEBUG] YouTube targeting {max_results} videos, max {max_pages} pages")
+            
             for page in range(max_pages):
                 search_response = self.youtube.search().list(
                     q=search_query,
@@ -76,7 +78,11 @@ class YouTubeScraper:
                     all_video_ids.append(item['id']['videoId'])
                 
                 page_token = search_response.get('nextPageToken')
+                print(f"[DEBUG] YouTube: Page {page+1} done, collected {len(all_video_ids)} IDs, nextToken={page_token[:20] if page_token else None}")
+                
                 if not page_token or len(all_video_ids) >= max_results:
+                    if not page_token:
+                        print(f"[DEBUG] YouTube: No more pages (nextPageToken is None)")
                     break
             
             mentions = []
