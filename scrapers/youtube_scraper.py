@@ -75,7 +75,9 @@ class YouTubeScraper:
                 ).execute()
                 
                 for item in search_response.get('items', []):
-                    all_video_ids.append(item['id']['videoId'])
+                    # Skip if not a video (could be channel or playlist)
+                    if 'videoId' in item.get('id', {}):
+                        all_video_ids.append(item['id']['videoId'])
                 
                 page_token = search_response.get('nextPageToken')
                 print(f"[DEBUG] YouTube: Page {page+1} done, collected {len(all_video_ids)} IDs, nextToken={page_token[:20] if page_token else None}")
