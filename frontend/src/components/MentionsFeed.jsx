@@ -3,6 +3,10 @@ import {
   Twitter, 
   MessageCircle, 
   Youtube, 
+  Instagram,
+  Facebook,
+  BookOpen,
+  FileText,
   TrendingUp, 
   Heart, 
   Repeat, 
@@ -31,6 +35,15 @@ const MentionsFeed = ({ mentions, analytics }) => {
         return <MessageCircle className="w-5 h-5 text-[#FF4500]" />;
       case 'youtube':
         return <Youtube className="w-5 h-5 text-[#FF0000]" />;
+      case 'instagram':
+        return <Instagram className="w-5 h-5 text-[#E4405F]" />;
+      case 'facebook':
+        return <Facebook className="w-5 h-5 text-[#1877F2]" />;
+      case 'medium':
+        return <BookOpen className="w-5 h-5 text-[#00AB6C]" />;
+      case 'blog':
+      case 'substack':
+        return <FileText className="w-5 h-5 text-[#FF6719]" />;
       default:
         return null;
     }
