@@ -18,11 +18,11 @@ router.post('/search', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Keyword is required' });
     }
     
-    // Path to Python scraper - USING SCRAPE.DO FOR UNLIMITED SCRAPING!
-    const scraperPath = path.resolve(__dirname, '../../../scrapers/main_scraper_scrape_do.py');
+    // Path to Python scraper
+    const scraperPath = path.resolve(__dirname, '../../../scrapers/main_scraper.py');
     
-    // Spawn Python process with UNLIMITED scraping (pass no limit for truly unlimited)
-    const python = spawn('python', [scraperPath, keyword]);
+    // Spawn Python process with max 1000 per platform
+    const python = spawn('python', [scraperPath, keyword, '1000']);
     
     let dataString = '';
     let errorString = '';
@@ -49,21 +49,16 @@ router.post('/search', authMiddleware, async (req, res) => {
         }
       }
       
-      // Get results from MongoDB (increased to 1000 for UNLIMITED data)
-      const mentions = await Mention.find({ keyword }).sort({ timestamp: -1 }).limit(1000);
+      // Get results from MongoDB
+      const mentions = await Mention.find({ keyword }).sort({ timestamp: -1 }).limit(500);
       
-      // Calculate analytics - NOW INCLUDING INSTAGRAM, FACEBOOK, BLOGS!
+      // Calculate analytics
       const analytics = {
         total_mentions: mentions.length,
         by_platform: {
           twitter: mentions.filter(m => m.platform === 'twitter').length,
           reddit: mentions.filter(m => m.platform === 'reddit').length,
-          youtube: mentions.filter(m => m.platform === 'youtube').length,
-          instagram: mentions.filter(m => m.platform === 'instagram').length,
-          facebook: mentions.filter(m => m.platform === 'facebook').length,
-          medium: mentions.filter(m => m.platform === 'medium').length,
-          blog: mentions.filter(m => m.platform === 'blog').length,
-          substack: mentions.filter(m => m.platform === 'substack').length
+          youtube: mentions.filter(m => m.platform === 'youtube').length
         },
         sentiment: {
           positive: mentions.filter(m => m.sentiment === 'positive').length,
@@ -115,16 +110,11 @@ router.get('/mentions/:keyword', authMiddleware, async (req, res) => {
     const analytics = {
       total_mentions: all_mentions.length,
       
-      // Platform breakdown - ALL PLATFORMS!
+      // Platform breakdown
       by_platform: {
         twitter: all_mentions.filter(m => m.platform === 'twitter').length,
         reddit: all_mentions.filter(m => m.platform === 'reddit').length,
-        youtube: all_mentions.filter(m => m.platform === 'youtube').length,
-        instagram: all_mentions.filter(m => m.platform === 'instagram').length,
-        facebook: all_mentions.filter(m => m.platform === 'facebook').length,
-        medium: all_mentions.filter(m => m.platform === 'medium').length,
-        blog: all_mentions.filter(m => m.platform === 'blog').length,
-        substack: all_mentions.filter(m => m.platform === 'substack').length
+        youtube: all_mentions.filter(m => m.platform === 'youtube').length
       },
       
       // Sentiment breakdown
