@@ -3,7 +3,6 @@ import { useAuth } from './context/AuthContext';
 import LandingLenis from './components/LandingLenis';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import Dashboard from './components/Dashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -27,14 +26,6 @@ function App() {
         <Route path="/" element={<LandingLenis />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
       </Routes>
     </Router>
   );

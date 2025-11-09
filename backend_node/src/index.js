@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { MONGODB_URI, PORT, CORS_ORIGINS } from './config.js';
 import authRoutes from './routes/auth.js';
-import scraperRoutes from './routes/scraper.js';
 
 const app = express();
 
@@ -16,7 +15,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/scrape', scraperRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
