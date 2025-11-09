@@ -1,22 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { ArrowRight } from 'lucide-react';
 import MiraiLogo from './MiraiLogo';
 import { SpotlightCard } from './ui/spotlight-card';
 import ShinyCard from './ui/shiny-card';
 
 const LandingLenis = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const lenisRef = useRef(null);
   const scrollRef = useRef(0);
-
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
 
   useEffect(() => {
     let vantaEffect = null;
