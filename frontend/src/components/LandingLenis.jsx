@@ -196,13 +196,12 @@ const LandingLenis = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-6" style={{ animation: 'fadeSlideUp 0.6s ease-out 0.5s backwards' }}>
-                <Link 
-                  to="/signup" 
+                <button 
                   className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-medium hover:bg-white/90 transition-all duration-300 hover:scale-105"
                 >
                   <span>Start Tracking Social Media</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
+                </button>
                 <button className="inline-flex items-center justify-center px-10 py-5 border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all duration-300">
                   See Analytics Demo
                 </button>
@@ -340,8 +339,7 @@ const LandingLenis = () => {
                   className={plan.popular ? 'lg:scale-105' : ''}
                 />
                 
-                <Link
-                  to="/signup"
+                <button
                   className={`block w-full text-center py-5 font-medium transition-all duration-300 hover:scale-105 mt-6 ${
                     plan.popular
                       ? 'bg-white text-black hover:bg-white/90'
@@ -349,7 +347,7 @@ const LandingLenis = () => {
                   }`}
                 >
                   Get Started
-                </Link>
+                </button>
               </div>
             ))}
           </div>
@@ -371,13 +369,12 @@ const LandingLenis = () => {
           <p className="text-2xl text-white/50 max-w-2xl mx-auto">
             Join 10,000+ creators using Mirai for data-driven decisions.
           </p>
-          <Link 
-            to="/signup"
+          <button 
             className="inline-flex items-center gap-4 px-12 py-6 bg-white text-black text-lg font-medium hover:bg-white/90 transition-all duration-300 hover:scale-105"
           >
             Start Free Trial
             <ArrowRight className="w-6 h-6" />
-          </Link>
+          </button>
         </div>
       </section>
 
