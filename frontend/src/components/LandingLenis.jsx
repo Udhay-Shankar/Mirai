@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import MiraiLogo from './MiraiLogo';
 import { SpotlightCard } from './ui/spotlight-card';
 import ShinyCard from './ui/shiny-card';
 
 const LandingLenis = () => {
-  const navigate = useNavigate();
   const lenisRef = useRef(null);
   const scrollRef = useRef(0);
 
@@ -169,18 +167,6 @@ const LandingLenis = () => {
             <a href="#pricing" className="text-white/50 hover:text-white transition-all duration-300">Pricing</a>
             <a href="#about" className="text-white/50 hover:text-white transition-all duration-300">About</a>
           </nav>
-          
-          <div className="flex items-center gap-6">
-            <Link to="/login" className="text-sm text-white/50 hover:text-white transition-all duration-300">
-              Sign In
-            </Link>
-            <Link 
-              to="/signup" 
-              className="px-6 py-2.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-all duration-300 hover:scale-105"
-            >
-              Sign Up
-            </Link>
-          </div>
         </div>
       </header>
 
