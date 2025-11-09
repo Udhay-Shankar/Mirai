@@ -155,12 +155,12 @@ const LandingLenis = () => {
       {/* Minimal Header */}
       <header className="fixed top-0 left-0 right-0 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-2xl" style={{ zIndex: 50 }}>
         <div className="max-w-[1600px] mx-auto px-8 lg:px-16 py-6 flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-3 group">
+          <a href="/" className="flex items-center space-x-3 group">
             <div className="transition-transform group-hover:scale-110 duration-300">
               <MiraiLogo size={32} />
             </div>
             <span className="text-xl font-bold tracking-tight font-mirai">MIRAI</span>
-          </Link>
+          </a>
           
           <nav className="hidden md:flex items-center space-x-10 text-sm">
             <a href="#features" className="text-white/50 hover:text-white transition-all duration-300">Features</a>
