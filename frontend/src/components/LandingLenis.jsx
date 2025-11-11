@@ -228,9 +228,9 @@ const LandingLenis = () => {
             <div className="relative h-[600px]" data-parallax data-speed="0.2">
               <div className="absolute inset-0">
                 {[
-                  { label: 'SOCIAL PROFILES', value: '10K+', x: '0%', y: '0%', delay: '0s', desc: 'Tracked' },
-                  { label: 'SENTIMENT ACCURACY', value: '92%', x: '10%', y: '40%', delay: '0.2s', desc: 'AI-Powered' },
-                  { label: 'UPTIME', value: '99.9%', x: '55%', y: '50%', delay: '0.3s', desc: 'Reliable' },
+                  { label: 'SOCIAL PROFILES', value: '10K+', x: '5%', y: '10%', delay: '0s', desc: 'Tracked' },
+                  { label: 'SENTIMENT ACCURACY', value: '92%', x: '50%', y: '5%', delay: '0.1s', desc: 'AI-Powered' },
+                  { label: 'UPTIME', value: '99.9%', x: '15%', y: '55%', delay: '0.2s', desc: 'Reliable' },
                 ].map((stat, idx) => (
                   <div 
                     key={idx} 
