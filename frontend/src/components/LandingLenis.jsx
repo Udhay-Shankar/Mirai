@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, X } from 'lucide-react';
 import MiraiLogo from './MiraiLogo';
 import { SpotlightCard } from './ui/spotlight-card';
 import ShinyCard from './ui/shiny-card';
@@ -7,11 +7,34 @@ import ShinyCard from './ui/shiny-card';
 const LandingLenis = () => {
   const lenisRef = useRef(null);
   const scrollRef = useRef(0);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    keyword: '',
+    date: ''
+  });
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    // Handle form submission here
+    setIsFormOpen(false);
+    // Reset form
+    setFormData({ name: '', email: '', keyword: '', date: '' });
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   useEffect(() => {
     let vantaEffect = null;
 
-    // Initialize Vanta.js Waves
+    // Initialize Vanta.js Waves with optimized settings for 60fps
     const initVanta = () => {
       const vantaEl = document.getElementById('vanta-bg');
       if (vantaEl && window.VANTA && window.THREE) {
@@ -26,10 +49,11 @@ const LandingLenis = () => {
           scale: 1.00,
           scaleMobile: 1.00,
           color: 0x0a0a0a,
-          shininess: 40.00,
-          waveHeight: 15.00,
-          waveSpeed: 0.75,
-          zoom: 0.85
+          shininess: 30.00,
+          waveHeight: 10.00,
+          waveSpeed: 0.50,
+          zoom: 0.85,
+          forceAnimate: true
         });
       }
     };
@@ -197,6 +221,7 @@ const LandingLenis = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 pt-6" style={{ animation: 'fadeSlideUp 0.6s ease-out 0.5s backwards' }}>
                 <button 
+                  onClick={() => setIsFormOpen(true)}
                   className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-medium hover:bg-white/90 transition-all duration-300 hover:scale-105"
                 >
                   <span>Start Tracking Social Media</span>
@@ -424,6 +449,117 @@ const LandingLenis = () => {
           </div>
         </div>
       </footer>
+
+      {/* Glassmorphism Form Modal */}
+      {isFormOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-black/50 animate-fadeIn"
+          onClick={() => setIsFormOpen(false)}
+        >
+          <div 
+            className="relative w-full max-w-lg bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)'
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setIsFormOpen(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+
+            {/* Form Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Get Started</h2>
+              <p className="text-white/60">Tell us what you'd like to track</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleFormSubmit} className="space-y-6">
+              {/* Name Input */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-medium text-white/80">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-white/80">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              {/* Keyword Input */}
+              <div className="space-y-2">
+                <label htmlFor="keyword" className="block text-sm font-medium text-white/80">
+                  Keyword to Track
+                </label>
+                <input
+                  type="text"
+                  id="keyword"
+                  name="keyword"
+                  value={formData.keyword}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+                  placeholder="e.g., YourBrand, #YourHashtag"
+                />
+              </div>
+
+              {/* Date Input */}
+              <div className="space-y-2">
+                <label htmlFor="date" className="block text-sm font-medium text-white/80">
+                  Required By Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full py-4 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <span>Start Tracking</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

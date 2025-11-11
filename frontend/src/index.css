@@ -37,6 +37,37 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Smooth 60fps animations */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+  will-change: opacity;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 0.5;
@@ -51,11 +82,25 @@
 /* Scroll Animation Classes */
 [data-animate] {
   transition: opacity 1s ease-out, transform 1s ease-out;
+  will-change: transform, opacity;
 }
 
 [data-animate].animate-in {
   opacity: 1 !important;
   transform: translateY(0) !important;
+}
+
+/* 60fps Smooth Performance Optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-parallax] {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 /* Smooth Lenis Scrolling */
