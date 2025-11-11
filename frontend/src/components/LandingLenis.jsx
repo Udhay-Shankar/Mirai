@@ -229,7 +229,6 @@ const LandingLenis = () => {
               <div className="absolute inset-0">
                 {[
                   { label: 'SOCIAL PROFILES', value: '10K+', x: '0%', y: '0%', delay: '0s', desc: 'Tracked' },
-                  { label: 'MENTIONS/DAY', value: '50M+', x: '50%', y: '10%', delay: '0.1s', desc: 'Analyzed' },
                   { label: 'SENTIMENT ACCURACY', value: '92%', x: '10%', y: '40%', delay: '0.2s', desc: 'AI-Powered' },
                   { label: 'UPTIME', value: '99.9%', x: '55%', y: '50%', delay: '0.3s', desc: 'Reliable' },
                 ].map((stat, idx) => (
