@@ -159,23 +159,23 @@ export const AuthProvider = ({ children }) => {
   }, [refreshToken]);
 
   // Email/Password Registration
-  const signUpWithEmail = async (email, password, fullName = null) => {
+  const signUpWithEmail = async (email, password, displayName = null) => {
     try {
       setError(null);
-      const response = await axios.post('/api/auth/register', {
+      const response = await axios.post('/api/auth/signup', {
         email,
         password,
-        full_name: fullName
+        displayName: displayName || email.split('@')[0]
       });
       
-      const { access_token, refresh_token, user: userData } = response.data;
-      storeTokens(access_token, refresh_token);
+      const { token, user: userData } = response.data;
+      storeTokens(token, null); // No refresh token yet
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
       return userData;
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Registration failed';
+      const errorMessage = err.response?.data?.error || 'Registration failed';
       setError(errorMessage);
       throw new Error(errorMessage);
     }
@@ -190,14 +190,14 @@ export const AuthProvider = ({ children }) => {
         password
       });
       
-      const { access_token, refresh_token, user: userData } = response.data;
-      storeTokens(access_token, refresh_token);
+      const { token, user: userData } = response.data;
+      storeTokens(token, null); // No refresh token yet
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
       return userData;
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Login failed';
+      const errorMessage = err.response?.data?.error || 'Login failed';
       setError(errorMessage);
       throw new Error(errorMessage);
     }

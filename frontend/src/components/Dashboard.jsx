@@ -8,6 +8,8 @@ import SentimentChart from './SentimentChart';
 import InfluencerList from './InfluencerList';
 import TrendingMetrics from './TrendingMetrics';
 import MiraiLogo from './MiraiLogo';
+import MentionsFeed from './MentionsFeed';
+import AdvancedAnalytics from './AdvancedAnalytics';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -91,10 +93,62 @@ const Dashboard = () => {
     setAnalyticsData(null);
 
     try {
-      const response = await analyticsAPI.search(keyword);
-      setAnalyticsData(response.data);
+      // Use new scraper API
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+      
+      // Trigger scraping
+      const scrapeResponse = await fetch('http://localhost:8000/api/scrape/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ keyword: keyword.trim() })
+      });
+
+      if (!scrapeResponse.ok) {
+        throw new Error('Failed to scrape mentions');
+      }
+
+      const scrapeResult = await scrapeResponse.json();
+      
+      // Fetch analytics data
+      const mentionsResponse = await fetch(`http://localhost:8000/api/scrape/mentions/${keyword.trim()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!mentionsResponse.ok) {
+        throw new Error('Failed to fetch analytics');
+      }
+
+      const analyticsResult = await mentionsResponse.json();
+      
+      // Transform data to match existing format
+      const formattedData = {
+        total_mentions: analyticsResult.analytics.total_mentions || 0,
+        unique_authors: analyticsResult.analytics.by_platform ? 
+          Object.values(analyticsResult.analytics.by_platform).reduce((a, b) => a + b, 0) : 0,
+        total_reach: analyticsResult.analytics.total_reach || 0,
+        avg_engagement: analyticsResult.analytics.total_engagement || 0,
+        sentiment_breakdown: {
+          positive: analyticsResult.analytics.sentiment?.positive || 0,
+          neutral: analyticsResult.analytics.sentiment?.neutral || 0,
+          negative: analyticsResult.analytics.sentiment?.negative || 0
+        },
+        sources: analyticsResult.analytics.by_platform || {},
+        top_keywords: analyticsResult.analytics.top_keywords || [],
+        mentions: analyticsResult.mentions || []
+      };
+
+      setAnalyticsData(formattedData);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to fetch analytics data');
+      setError(err.message || 'Failed to fetch analytics data');
       console.error('Error fetching analytics:', err);
     } finally {
       setSearching(false);
@@ -309,7 +363,7 @@ const Dashboard = () => {
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Stats Grid - Mittalmar Style */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm rounded-xl border border-primary/30 p-6 hover:border-primary/50 transition-all shadow-lg shadow-primary/10">
                     <div className="flex items-start justify-between">
                       <div>
@@ -353,6 +407,11 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Mentions Feed - Awario Style (Most Important!) */}
+                {analyticsData.mentions && analyticsData.mentions.length > 0 && (
+                  <MentionsFeed mentions={analyticsData.mentions} />
+                )}
 
                 {/* Sentiment Chart */}
                 {analyticsData.sentiment_breakdown && (

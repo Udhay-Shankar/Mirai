@@ -1,3 +1,0 @@
-"""
-Analytics module initialization.
-"""
